@@ -3,159 +3,105 @@
 
 
 
+;;; "COERCION"
 
-;;; COERCION
+; NB: coercion in computer science means the implicit process of converting a
+; value of one type to another type
+; the term is not totally wrong for how it is used in this library, since that's
+; what we're trying to achieve, to have the library automatically convert the
+; value between types, even though it is done in an user-defined function
 
-; TODO: tbi
-; coerce-fn is the function that applies the coercion
-; should follow some convention that returns a specific error
-; so that the root caller knows what's wrong
-; i.e. imagine this being called N levels deep e.g. in the context of a web-api
-; the caller should know where the error happened exactly so that it returns a correct return value
-; 400 bad request, etc
+; this process is applied ot a single value at a time
 
-; idea is:
-; have the "type" definition somewhere in a "schema"
-; type definition should be mapped to some coercion function
-; coercion functions are either default supplied by library or user defined
-; grab that schema and apply coercion function
+(defn- coerce [coerce-fn param arg on-coerce-fail]
+  "Applies the `coerce-fn` with the `arg` as argument. If `coerce-fn` throws
+  an exception, `on-coerce-fail` will be called and supplied with the available
+  information at the time."
+  (try
+    (coerce-fn arg)
+    (catch Exception e
+      (on-coerce-fail e param arg))))
 
-; define coercion
-; that's gonna be harder
-; a simple library where a map is defined
-; :param-name :param-type :on-fail-fn :coerce-fn
-; and the library takes care of trying to coerce the param to the correct type
-; or calls the user-defined :coerce-fn to do the work
-
-
-(defn- coerce [value coerce-fn]
-  (coerce-fn value)
-  )
-
-
-
-(defn to-str [v]
-  (str v))
-
-(defn to-int [v]
-  (Integer/parseInt v))
-
-(defn to-double [v]
-  (Double/parseDouble v))
-
-(defn to-long [v]
-  (Long/parseLong v))
-
-; ; coercion definition (what and what to coerce)
-; {
-;   :param1-name to-str
-;   :param2-name to-int
-;   :param3-name to-double
-;   ...
-; }
-
-
-; ; create a function that
-; ; accesses the arguments of a function
-; ; makes the coercion based on the coercion definition
-; ; replaces the arguments with the new values
-; ; basically I want to do an interceptor that changes the values of a function
-; ; and use it as if it were an annotation
-
-; @coercer
-; (defn x ^{:coercer-policy } [a b c]
-;   ...)
-
-; coercer will
-; intercept the call to x
-; coerce a b c to d e f
-; call (x d e f)
-
-
-
-; ------------------------------------------------
-
-; v1
-; define coercions definition
-; take definition and argument list as params
-; return coerced argument list
 
 
 ;;; VALIDATION
 
-; TODO: tbi
-; define validation info somewhere in a "schema" definition
-; validation info is a user-defined function
-; should follow some convention that returns a specific error
-; so that the root caller knows what's wrong
-
-; several levels of validation
-; first level validation: existence (nil/non-nil)
-; second level validation: type validation (String, Double)
-; third level validation: argument specific (length, enum, etc)
-
-
-; define validation (using validateur)
-; ideally in the korma models
-; or at least in the same module
-
-; implement a middleware function
-; wrap-something
-
-(defn validate-str [s]
-  (println "do some string validation here")
-  true)
-
-(defn validate-int [s]
-  (println "do some int validation here")
-  true)
-
-(defn my-fn [^{:vld-fn validate-str} arg1 ^{:vld-fn validate-int} arg2]
-  (println "my-fn")
-  (println arg1)
-  (println arg2)
-)
-
-(defn- get-arglist [handler]
-  "Helper for retrieving the argument list from a function (var)."
-  (->
-    (meta handler)
-    (:arglists)
-    (first)))
-
-(defn get-vld-fns [fn-params]
-  (->>
-    fn-params
-    (map meta)
-    (map :vld-fn)
-  ))
-
-(defn exec-vld-fn [vld-fn arg]
-  ; TODO: catch exceptions
-  (if (not (nil? vld-fn))
-    (apply vld-fn arg)))
-
-(defn validate-args [fn-params fn-args]
-  (let [vld-fns (get-vld-fns fn-params)]
-    (map exec-vld-fn vld-fns fn-args)
-    ))
+(defn- validate [validate-fn param arg on-validate-fail]
+  (try
+    (validate-fn arg)
+    (catch Exception e)
+      (on-validate-fail e param arg)))
 
 
 
-; (validate-args args)
+;;; ENFORCER
+
+(defn- default-on-coerce-fail [exception param arg]
+  {:error (str "Failed to cast " param " with value " arg ". Exception: " exception)})
+(defn- default-on-validate-fail [exception param arg]
+  {:error (str "Failed to validate " param " with value " arg ". Exception: " exception)})
+
+(defn- default-enforcer [arg _]
+  arg)
+
+(defn run [fnvar args]
+  ; obtain the general metadata from the function
+  ; `validate`: general validation function (for more complex validations)
+  ; `on-validate-fail`: general validation error handling function
+  ; `on-coerce-fail`: general coercion error handling function
+  (let [metadata (meta fnvar)
+        params (first (:arglists metadata))
+        fn-validate (get metadata :validate default-enforcer)
+        fn-validate-fail (get metadata :validate-fail default-on-validate-fail)
+        fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)]
+    ; apply enforcer rules: TODO: this isn't really functional :\
+    (map (fn [param arg]
+      ; argument-specific functions (attached to fnvar's arglists)
+      ; `enforce`: coercion+validation function
+      ; `coerce`: coercion function
+      ; `coerce-fail`: coercion error handling function
+      ; `validate`: validation function
+      ; `validate-fail`: validation error handling function
+      (let [param-meta (meta param)
+            enforce-fn (:enforce param-meta)
+            coerce-fn (get param-meta :coerce default-enforcer)
+            coerce-fail (get param-meta :coerce-fail fn-coerce-fail)
+            validate-fn (get param-meta :validate fn-validate)
+            validate-fail (get param-meta :validate-fail fn-validate-fail)]
+        ; TODO:
+        ; apply the operations in the correct way
+        ;
+        ; if `enforce`exists, apply enforce
+        ; else
+        ;   if coerce exists, apply coerce
+        ;   if validate exists, apply validate
+        ;
+        ; if coerce-fail exists, use coerce-fail
+        ; else if on-coerce-fail exists, use on-coerce-fail
+        ; else, use default-on-coerce-fail
+        ;
+        ; if validate-fail exists, use validate-fail
+        ; else if on-validate-fail exists, use on-validate-fail
+        ; else, use default-on-validate-fail
+        ;
+        ; what to return?
+        ; - coerced values/nil (?)
+        ; - the enforced/coerced+validated value
+        (if (not (nil? enforce))
+          (enforce-fn param arg coerce-fail validate-fail)
+          (->
+            (coerce coerce-fn param arg coerce-fail)
+            (validate validate-fn param arg validate-fail)))
+        )
+    ) params args)))
 
 
-;;; MIDDLEWARE
 
-(defn wrap-enforcer
-  [handler]
-  (fn [request]
+(defn enforce [fnvar args]
+  ; coerce and validate the arguments against the function's definition
+  (run fnvar args))
 
-
-
-
-    (handler request)
-    ))
-
-
-
+(defn enforce-all [fnvars largs]
+  ; coerce and validate the list of arguments against the list of function definitions
+  (map enforce fnvar largs)
+  )

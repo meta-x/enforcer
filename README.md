@@ -1,6 +1,6 @@
 # enforcer
 
-A validation and coercion library.
+A library for coercion (or more correctly, type-casting) and validation of functions and their arguments.
 
 ATTN: under development!
 
