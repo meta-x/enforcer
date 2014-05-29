@@ -29,8 +29,8 @@
 (defn- validate [validate-fn param arg on-validate-fail]
   (try
     (validate-fn arg)
-    (catch Exception e)
-      (on-validate-fail e param arg)))
+    (catch Exception e
+      (on-validate-fail e param arg))))
 
 
 
@@ -70,7 +70,7 @@
         fn-validate (get metadata :validate default-enforcer)
         fn-validate-fail (get metadata :validate-fail default-on-validate-fail)
         fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)]
-    ; apply enforcer rules: TODO: this isn't really functional :\
+    ; apply enforcer rules: TODO: is this "functional"? doesn't feel like it :\
     (map (fn [param arg]
       ; argument-specific functions (attached to fnvar's arglists)
       ; `enforce`: coercion+validation function
@@ -84,26 +84,26 @@
             coerce-fail (get param-meta :coerce-fail fn-coerce-fail)
             validate-fn (get param-meta :validate fn-validate)
             validate-fail (get param-meta :validate-fail fn-validate-fail)]
-        ; TODO:
-        ; apply the operations in the correct way
+        ; apply the operations in the correct way, general workflow is the following
         ;
-        ; if `enforce`exists, apply enforce
+        ; if `enforce` exists, apply `enforce`
         ; else
-        ;   if coerce exists, apply coerce
-        ;   if validate exists, apply validate
+        ;   if `coerce` exists, apply `coerce`
+        ;   if `validate` exists, apply `validate`
         ;
-        ; if coerce-fail exists, use coerce-fail
-        ; else if on-coerce-fail exists, use on-coerce-fail
-        ; else, use default-on-coerce-fail
+        ; if `coerce-fail` exists, use `coerce-fail`
+        ; else if `on-coerce-fail` exists, use `on-coerce-fail`
+        ; else, use `default-on-coerce-fail`
         ;
-        ; if validate-fail exists, use validate-fail
-        ; else if on-validate-fail exists, use on-validate-fail
-        ; else, use default-on-validate-fail
+        ; if `validate-fail` exists, use `validate-fail`
+        ; else if `on-validate-fail` exists, use `on-validate-fail`
+        ; else, use `default-on-validate-fail`
         ;
-        ; what to return?
-        ; - coerced values/nil (?)
+        ; returns a sequence of
         ; - the enforced/coerced+validated value
-        (if (not (nil? enforce))
+        ; - error maps from the error-handlers
+        ; mixed together
+        (if (not (nil? enforce-fn))
           (enforce-fn param arg coerce-fail validate-fail)
           (->
             (coerce coerce-fn param arg coerce-fail)
@@ -119,5 +119,6 @@
 
 (defn enforce-all [fnvars largs]
   ; coerce and validate the list of arguments against the list of function definitions
-  (map enforce fnvar largs)
-  )
+  (map enforce fnvars largs))
+
+

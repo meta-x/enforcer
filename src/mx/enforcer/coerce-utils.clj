@@ -1,7 +1,6 @@
 (ns mx.enforcer.coerce-utils
   )
 
-
 ; coercing helpers (i.e. common coercing functions)
 
 (defn to-str [v]

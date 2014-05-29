@@ -7,6 +7,7 @@
   }
   :dependencies [
     [org.clojure/clojure "1.6.0"]
+    [cheshire "5.3.1"]
   ]
   :deploy-repositories [
     ["clojars" {:sign-releases false}]
