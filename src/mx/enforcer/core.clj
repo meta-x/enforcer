@@ -37,11 +37,27 @@
 ;;; ENFORCER
 
 (defn- default-on-coerce-fail [exception param arg]
-  {:error (str "Failed to cast " param " with value " arg ". Exception: " exception)})
+  {
+    :error
+    {
+      :msg (str "Failed to cast " param " with value " arg ". Exception: " exception)
+      :param param
+      :arg arg
+      :exception exception
+    }
+  })
 (defn- default-on-validate-fail [exception param arg]
-  {:error (str "Failed to validate " param " with value " arg ". Exception: " exception)})
+  {
+    :error
+    {
+      :msg (str "Failed to validate " param " with value " arg ". Exception: " exception)
+      :param param
+      :arg arg
+      :exception exception
+    }
+  })
 
-(defn- default-enforcer [arg _]
+(defn- default-enforcer [arg _] ; default validate/coerce function (identity)
   arg)
 
 (defn run [fnvar args]
