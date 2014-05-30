@@ -23,13 +23,16 @@
     (assoc request)))
 
 (defn wrap-enforcer
-  ([handler route-dispatcher]
-    (wrap-enforcer handler route-dispatcher default-error-handler))
-  ([handler route-dispatcher error-handler]
+  "Middleware that applies the coercion and validation rules to the request
+  handler's arguments."
+  ([handler query-routes]
+    (wrap-enforcer handler query-routes default-error-handler))
+  ([handler query-routes error-handler]
     (fn [request]
       ; unwrap the objects and apply the enforcing
-      (let [fn-var (route-dispatcher request)
-            old-params (:params request)
+      (let [[fn-var route-params] (query-routes request)
+            request-params (:params request)
+            old-params (merge request-params route-params)
             new-params (enforce fn-var old-params)]
         ; if there was any error during enforcing, execute error handler
         ; otherwise continue ring middleware processing

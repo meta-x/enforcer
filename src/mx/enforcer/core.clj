@@ -11,7 +11,7 @@
 ; what we're trying to achieve, to have the library automatically convert the
 ; value between types, even though it is done in an user-defined function
 
-; this process is applied ot a single value at a time
+; this process is applied on a single value at a time
 
 (defn- coerce [coerce-fn param arg on-coerce-fail]
   "Applies the `coerce-fn` with the `arg` as argument. If `coerce-fn` throws
@@ -62,12 +62,10 @@
 
 (defn run [fnvar args]
   ; obtain the general metadata from the function
-  ; `validate`: general validation function (for more complex validations)
   ; `on-validate-fail`: general validation error handling function
   ; `on-coerce-fail`: general coercion error handling function
   (let [metadata (meta fnvar)
         params (first (:arglists metadata))
-        fn-validate (get metadata :validate default-enforcer)
         fn-validate-fail (get metadata :validate-fail default-on-validate-fail)
         fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)]
     ; apply enforcer rules: TODO: is this "functional"? doesn't feel like it :\
@@ -82,7 +80,7 @@
             enforce-fn (:enforce param-meta)
             coerce-fn (get param-meta :coerce default-enforcer)
             coerce-fail (get param-meta :coerce-fail fn-coerce-fail)
-            validate-fn (get param-meta :validate fn-validate)
+            validate-fn (get param-meta :validate default-enforcer)
             validate-fail (get param-meta :validate-fail fn-validate-fail)]
         ; apply the operations in the correct way, general workflow is the following
         ;
