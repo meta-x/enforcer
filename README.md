@@ -10,7 +10,7 @@ Please give feedback/suggestions/etc through github issues.
 
 ## Examples
 
-* Check the project in `examples/enforcer_lib` for an example of a common clojure application using `enforcer` as a library. You can run the application by execute `lein run`.
+* Check the project in `examples/enforcer_lib` for an example of a common clojure application using `enforcer` as a library. You can run the application by executing `lein run`.
 
 * The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
 
@@ -32,7 +32,7 @@ to your leiningen `:dependencies`.
 
 `enforcer` can be used as a common library in your clojure apps or, more specifically, as a ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
 
-In order to use `enforcer`, you must follow the following steps.
+Follow the white rabbit to learn how to use `enforcer`.
 
 ### 1. Require the library
 Require what you wish to use. If you're only planning to use `enforcer` as a library in a common clojure application, you need only to require the `enforce` function or `enforce-all` for the rare situations where you might want to apply enforcement on multiple target functions.
@@ -47,7 +47,7 @@ If you're dealing with a ring application, you only need to require the middlewa
 ```
 
 ### 2. Create your coercion/validation functions and error handlers
-The functions must take two parameters:
+The `coerce`/`validate` functions must take two parameters:
 * `param`: the name of the argument that is being evaluated
 * `arg`: the value of the argument that is being evaluated
 
@@ -59,17 +59,17 @@ The functions must take two parameters:
   ...)
 ```
 
-In case of success these functions must return a single value - the `coercion` functions should return a casted value; the `validation` functions will return the (same) input value `arg`.
+In case of success these functions must return a single value - the `coerce` functions should return a casted value; the `validate` functions will return the (same) input value `arg`.
 In case of error, the functions must throw an `exception`.
 
-In alternative, you can have a do-it-all `enforce` function. The `enforce` function is for the cases where you'd rather have a single function where you deal with everything. This enforce function must have the same signature and return value as the coercion/validation functions.
+In alternative, you can have a do-it-all `enforce` function. The `enforce` function is for the cases where you'd rather have a single function where you deal with everything. The `enforce` function must have the same signature and return value as the `coerce`/`validate` functions.
 ```clojure
 (defn custom-enforcer [param arg]
   ...)
 ```
 In case of error, a map with a single key named `:error` must be returned. The value of the map does not have to follow any rule.
 
-You _should_ also define your own error handlers. There are two different "levels" of error handlers:
+You _should_ also define your own error handlers (`:coerce-fail`/`:validate-fail`). There are two different "levels" of error handlers:
 * parameter error handlers are set up at the parameter level and will handle errors when evaluating that specific parameter
 * general error handlers are set up at the target function level and will work as a kind of try/catch all, i.e. if the parameter does not have an error handler configured, this one will be called (if defined)
 
@@ -88,18 +88,16 @@ After creating the functions that execute the coercion and validation, we must t
 (defn ^{:enforcer-ns 'enforcer-paths.core :validate-fail custom-validate-fail :coerce-fail custom-coerce-fail} handler-with-args
   [^{:enforce custom-enforcer} p1
    ^{:coerce custom-coercer :validate custom-validator} p2]
-  (println "--- handler-with-args")
-  (println p1)
-  (println p2)
-  (response (str p1 "\n" p2)))
+   ...
+  )
 ```
--target function level setup-
+#### Target function level setup
 
 [**required**] Add a `:enforcer-ns` key to the target function's metadata. The value of this key specifies the namespace under which the coercion/validation/error-handler functions are located.
 
 [_optional_] You can define general error handlers for the case where coercion/validation fails. In case you don't specify argument specific error handlers, it will fall back to the general error handlers. In the case where no error-handler is defined, it will default to the library's own error handlers. These error handlers are specified with the keys `:coerce-fail` and `:validate-fail`.
 
--argument level setup-
+#### Argument level setup
 
 [_optional_] The coercion (`:coerce`) and validation (`:validate`) functions are optional.
 In the case where a coercion function is not defined but a validation function is, the argument will passed as-is to the validation function.
@@ -135,6 +133,8 @@ In order to achieve this using a different routing library, you might need to ad
 ```clojure
 TODO: compojure handler dispatcher
 ```
+
+; TODO: talk about optional error handler for the middleware (400 bad request)
 
 
 
