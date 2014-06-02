@@ -31,12 +31,10 @@
 
 
 
-(defn custom-enforcer [param arg coerce-fail validate-fail]
+(defn custom-enforcer [param arg]
   (println "custom-enforcer")
   (println param "\t" arg)
   (println arg)
-  (println coerce-fail)
-  (println validate-fail)
   (if (nil? arg)
     {:error {
       :msg (str param " missing.")

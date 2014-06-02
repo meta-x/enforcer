@@ -127,7 +127,7 @@
             ; - error maps from the error-handlers
             ; mixed together
             (if (not (nil? enforce-fn))
-              (enforce-fn param arg coerce-fail validate-fail)
+              (enforce-fn param arg)
               (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)
             )))
         params)
