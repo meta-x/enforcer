@@ -5,22 +5,28 @@
 
 (defn- get-errors [result]
   (->>
-    result
-    (filter :error)
-    (map :error) ; remove the top-level :error key
-    (seq))) ; nil or ({error obj})
+    (map
+      #(if-let [error (:error %2)]
+          error
+          nil)
+      (keys result)
+      (vals result)
+    )
+    (filter (comp not nil?))
+    (seq) ; nil or ({error obj})
+  ))
 
 (defn- default-error-handler [errors]
   {
     :status 400
-    :body (generate-string errors) ; return a json string in the form [{error obj}]
+    :body (generate-string errors) ; return a json string in the form [error-obj]
   })
 
 (defn- new-request [request old-params new-params]
   "Updates the request object with the enforced parameter values."
   (->>
     (merge old-params new-params)
-    (assoc request)))
+    (assoc request :params)))
 
 (defn wrap-enforcer
   "Middleware that applies the coercion and validation rules to the request
@@ -38,4 +44,5 @@
         ; otherwise continue ring middleware processing
         (if-let [errors (get-errors new-params)]
           (error-handler errors)
-          (handler (new-request request old-params new-params)))))))
+          (handler (new-request request old-params new-params)))
+  ))))

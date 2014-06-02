@@ -60,6 +60,27 @@
 (defn- default-enforcer [arg _] ; default validate/coerce function (identity)
   arg)
 
+(defn- get-param-meta [param-meta ns key default]
+  "Helper that extracts the metadata from function parameters."
+  (or
+    (some->>
+      (get param-meta key)
+      (ns-resolve ns))
+    default
+    ))
+
+(defn- coerce-validate [coerce-fn validate-fn param arg on-coerce-fail on-validate-fail]
+  "Helper that applies coercion and validation or error handlers in case any of
+  the functions fails."
+  (try
+    (let [coerced-val (coerce-fn param arg)]
+      (try
+        (validate-fn param coerced-val)
+        (catch Exception e
+          (on-validate-fail e param arg))))
+    (catch Exception e
+      (on-coerce-fail e param arg))))
+
 (defn run [fnvar args]
   ; obtain the general metadata from the function
   ; `on-validate-fail`: general validation error handling function
@@ -67,47 +88,52 @@
   (let [metadata (meta fnvar)
         params (first (:arglists metadata))
         fn-validate-fail (get metadata :validate-fail default-on-validate-fail)
-        fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)]
+        fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)
+        ns (:enforcer-ns metadata)]
     ; apply enforcer rules: TODO: is this "functional"? doesn't feel like it :\
-    (map (fn [param arg]
-      ; argument-specific functions (attached to fnvar's arglists)
-      ; `enforce`: coercion+validation function
-      ; `coerce`: coercion function
-      ; `coerce-fail`: coercion error handling function
-      ; `validate`: validation function
-      ; `validate-fail`: validation error handling function
-      (let [param-meta (meta param)
-            enforce-fn (:enforce param-meta)
-            coerce-fn (get param-meta :coerce default-enforcer)
-            coerce-fail (get param-meta :coerce-fail fn-coerce-fail)
-            validate-fn (get param-meta :validate default-enforcer)
-            validate-fail (get param-meta :validate-fail fn-validate-fail)]
-        ; apply the operations in the correct way, general workflow is the following
-        ;
-        ; if `enforce` exists, apply `enforce`
-        ; else
-        ;   if `coerce` exists, apply `coerce`
-        ;   if `validate` exists, apply `validate`
-        ;
-        ; if `coerce-fail` exists, use `coerce-fail`
-        ; else if `on-coerce-fail` exists, use `on-coerce-fail`
-        ; else, use `default-on-coerce-fail`
-        ;
-        ; if `validate-fail` exists, use `validate-fail`
-        ; else if `on-validate-fail` exists, use `on-validate-fail`
-        ; else, use `default-on-validate-fail`
-        ;
-        ; returns a sequence of
-        ; - the enforced/coerced+validated value
-        ; - error maps from the error-handlers
-        ; mixed together
-        (if (not (nil? enforce-fn))
-          (enforce-fn param arg coerce-fail validate-fail)
-          (->
-            (coerce coerce-fn param arg coerce-fail)
-            (validate validate-fn param arg validate-fail)))
-        )
-    ) params args)))
+    (->>
+      (map
+        (fn [param]
+          ; argument-specific functions (attached to fnvar's arglists)
+          ; `enforce`: coercion+validation function
+          ; `coerce`: coercion function
+          ; `coerce-fail`: coercion error handling function
+          ; `validate`: validation function
+          ; `validate-fail`: validation error handling function
+          (let [arg (get args (keyword param))
+                param-meta (meta param)
+                enforce-fn (get-param-meta param-meta ns :enforce nil)
+                coerce-fn (get-param-meta param-meta ns :coerce default-enforcer)
+                coerce-fail (get-param-meta param-meta ns :coerce-fail fn-coerce-fail)
+                validate-fn (get-param-meta param-meta ns :validate default-enforcer)
+                validate-fail (get-param-meta param-meta ns :validate-fail fn-validate-fail)]
+            ; apply the operations in the correct way, general workflow is the following
+            ;
+            ; if `enforce` exists, apply `enforce`
+            ; else
+            ;   if `coerce` exists, apply `coerce`
+            ;   if `validate` exists, apply `validate`
+            ;
+            ; if `coerce-fail` exists, use `coerce-fail`
+            ; else if `on-coerce-fail` exists, use `on-coerce-fail`
+            ; else, use `default-on-coerce-fail`
+            ;
+            ; if `validate-fail` exists, use `validate-fail`
+            ; else if `on-validate-fail` exists, use `on-validate-fail`
+            ; else, use `default-on-validate-fail`
+            ;
+            ; returns a sequence of
+            ; - the enforced/coerced+validated value
+            ; - error maps from the error-handlers
+            ; mixed together
+            (if (not (nil? enforce-fn))
+              (enforce-fn param arg coerce-fail validate-fail)
+              (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)
+            )))
+        params)
+      (zipmap params) ; {:a 1 :b 2 ... :key value}
+    )
+  ))
 
 
 
@@ -118,5 +144,3 @@
 (defn enforce-all [fnvars largs]
   ; coerce and validate the list of arguments against the list of function definitions
   (map enforce fnvars largs))
-
-

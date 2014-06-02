@@ -8,8 +8,9 @@
     [org.clojure/clojure "1.6.0"]
     [enforcer "0.1.0-beta1"]
     [paths "0.1.0-beta2"]
-    [ring/ring-core "1.3.0-beta2"]
-    [ring/ring-jetty-adapter "1.3.0-beta2"]
+    [ring/ring-core "1.3.0-RC1"]
+    [ring/ring-jetty-adapter "1.3.0-RC1"]
+    [cheshire "5.3.1"]
   ]
   :profiles {
     :dev {
