@@ -6,7 +6,13 @@
 ;;; HANDLERS
 
 (defn index []
-  (response "hey"))
+  (response "<div>hi</div>
+            <div>you should be running this with an eye on the <a href='https://github.com/meta-x/enforcer/tree/master/examples/enforcer_paths/src/enforcer_paths'>example's source code</a>.</div>
+             <a href='/with/args?p1=1&amp;p2=2&amp;p3=0'>handler that takes 3 different arguments</a><br/>
+             <a href='/with/no/args'>handler that takes no arguments</a><br/>
+             <a href='/this/accepts/anything/yeah'>wildcard example</a><br/>
+            "))
+
 
 (defn ^{:enforcer-ns 'enforcer-paths.enforcement :validate-fail custom-validate-fail :coerce-fail custom-coerce-fail} handler-with-args
   [^{:enforce custom-enforcer} p1

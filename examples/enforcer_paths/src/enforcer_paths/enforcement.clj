@@ -38,7 +38,7 @@
     }}
     arg))
 
-(defn custom-enforcer-wildcards [param arg coerce-fail validate-fail]
+(defn custom-enforcer-wildcards [param arg]
   (println "custom-enforcer")
   (println param "\t" arg)
   (println arg)
