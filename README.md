@@ -10,41 +10,46 @@ Please give feedback/suggestions/etc through github issues.
 
 ## Examples
 
-* Check the project in `examples/enforcer_lib` for an example of a common clojure application using `enforcer` as a library. You can run the application by executing `lein run`.
+not finished yet
+
+<!-- * Check the project in `examples/enforcer_lib` for an example of a common clojure application using `enforcer` as a library. You can run the application by executing `lein run`.
 
 * The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
+ -->
 
 
 
 ## Installation
 
-Add
+not finished yet
+
+<!-- Add
 
 ```clojure
 [enforcer "0.1.0-beta1"]
 ```
 
 to your leiningen `:dependencies`.
-
+ -->
 
 
 ## Usage
 
-`enforcer` can be used as a common library in your clojure apps or, more specifically, as a ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
+`enforcer` can be used as a common library in your clojure apps or, more specifically, as a Ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
 
 The key concepts are:
-* The target function and its arguments: these are the arguments that you want to coerce and/or validate
-* The coercion/validation functions and error handlers: these are the functions that take care of executing the coercing and/or validation and that deal with something going wrong
+* The target function and its arguments: the function that will "evaluated" and the arguments that you want to coerce and/or validate
+* The coercion/validation functions and error handlers: the functions that take care of executing the coercion and/or validation and that deal with wrong input
 
 This semi-legible image tries to explain how things are tied together
 ![How enforcer works](/doc/how-enforcer-works.jpg?raw=true)
 
-Follow the white rabbit to learn more about how to use `enforcer`.
+Follow the :rabbit2: to learn more about how to use `enforcer`.
 
 ### 1. Require the library
 Require what you wish to use. If you're only planning to use `enforcer` as a library in a common clojure application, you need only to require the `enforce` function or `enforce-all` for the rare situations where you might want to apply enforcement on multiple target functions.
 
-If you're dealing with a ring application, you only need to require the middleware.
+If you're dealing with a Ring application, you only need to require the middleware.
 
 ```clojure
 (ns ...
@@ -124,8 +129,8 @@ create an example using enforcer as a library
 will everything work correctly? or will I need to create a function to return the right value to the caller?
 
 
-### 4b. Using `enforcer` as a ring middleware
-Using `enforcer` as a middleware to your ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes` function when calling `wrap-enforcer`, i.e.
+### 4b. Using `enforcer` as a Ring middleware
+Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes` function when calling `wrap-enforcer`, i.e.
 ```clojure
 (wrap-enforcer (bind-query-routes routes-tree))
 ```
