@@ -1,6 +1,8 @@
 (ns mx.enforcer.core
   )
 
+; TODO: auto-infer the namespace by using the :ns meta
+
 
 
 ;;; "COERCION"

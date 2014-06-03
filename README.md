@@ -162,6 +162,11 @@ In order to achieve this using a different routing library, you might need to ad
 TODO: sketch of how `enforcer` works
 
 
+## Limitations
+
+Due to the way Clojure's metadata works (metadata in parameters is not evaluated), all the functions you set in the target function must belong to the same namespace. If you have ideas on how to improve this (ideally that don't involve stating the namespace for each function), do share.
+
+
 ## TODO / You can help by
 
 - writing real tests
