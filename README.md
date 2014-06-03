@@ -32,7 +32,14 @@ to your leiningen `:dependencies`.
 
 `enforcer` can be used as a common library in your clojure apps or, more specifically, as a ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
 
-Follow the white rabbit to learn how to use `enforcer`.
+The key concepts are:
+* The target function and its arguments: these are the arguments that you want to coerce and/or validate
+* The coercion/validation functions and error handlers: these are the functions that take care of executing the coercing and/or validation and that deal with something going wrong
+
+This semi-legible image tries to explain how things are tied together
+![How enforcer works](/doc/how-enforcer-works.jpg?raw=true)
+
+Follow the white rabbit to learn more about how to use `enforcer`.
 
 ### 1. Require the library
 Require what you wish to use. If you're only planning to use `enforcer` as a library in a common clojure application, you need only to require the `enforce` function or `enforce-all` for the rare situations where you might want to apply enforcement on multiple target functions.
@@ -85,7 +92,7 @@ In case of error while evaluating a target function's arguments, the values of a
 After creating the functions that execute the coercion and validation, we must tell `enforcer` how to find these functions and what is the target function and the parameters to evaluate. This is done by attaching metadata keys to the target function and it's parameters.
 
 ```clojure
-(defn ^{:enforcer-ns 'enforcer-paths.core :validate-fail custom-validate-fail :coerce-fail custom-coerce-fail} handler-with-args
+(defn ^{:enforcer-ns 'enforcer-paths.core :validate-fail custom-validate-fail :coerce-fail custom-coerce-fail} my-fn
   [^{:enforce custom-enforcer} p1
    ^{:coerce custom-coercer :validate custom-validator} p2]
    ...
@@ -105,21 +112,24 @@ The same is true in the case where there is a coercion function but not a valida
 
 [_optional_] In the case where you prefer to just do it all in a single function, you can use the `:enforce` metadata key. The presence of this key takes precedence over `:coerce` and `validate`.
 
-### 4a. Execute `enforcer`
+### 4a. Executing `enforcer`
 With all set up, whenever you want to apply the enforcement, you just call `enforce`, passing the var of the target function e.g. `#'my-fn` and the list of arguments.
 ```clojure
-
+  (enforce #'my-fn [1 2])
 ```
+`enforce` will return a map that consists of param:value pairs (in this case `{:p1 1 p2 2}`).
+
 TODO:
 create an example using enforcer as a library
 will everything work correctly? or will I need to create a function to return the right value to the caller?
 
 
-### 4b. `enforcer` as a ring middleware
+### 4b. Using `enforcer` as a ring middleware
 Using `enforcer` as a middleware to your ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes` function when calling `wrap-enforcer`, i.e.
 ```clojure
 (wrap-enforcer (bind-query-routes routes-tree))
 ```
+
 If you are **not** using `paths`, then you must tell `enforcer` how to find the handler function for any given request. This means creating a function with the following signature and return value:
 ```clojure
 (fn [request]
@@ -134,7 +144,7 @@ In order to achieve this using a different routing library, you might need to ad
 TODO: compojure handler dispatcher
 ```
 
-; TODO: talk about optional error handler for the middleware (400 bad request)
+`wrap-enforcer`also takes an optional third argument that is an error handler for the middleware. The default error handler returns an http response with the 400 status code (bad request) and a JSON body with all the errors. To override this default behavior, implement a function that accepts a single argument that is a vector of errors. The structure of each error is however you defined your errors to be in your `enforcer` error handlers.
 
 
 
