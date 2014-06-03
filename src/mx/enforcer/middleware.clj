@@ -1,20 +1,7 @@
 (ns mx.enforcer.middleware
-  (:require [mx.enforcer.core :refer [enforce]]
+  (:require [mx.enforcer.core :refer [enforce get-errors]]
             [cheshire.core :refer [generate-string]])
   )
-
-(defn- get-errors [result]
-  (->>
-    (map
-      #(if-let [error (:error %2)]
-          error
-          nil)
-      (keys result)
-      (vals result)
-    )
-    (filter (comp not nil?))
-    (seq) ; nil or ({error obj})
-  ))
 
 (defn- default-error-handler [errors]
   {

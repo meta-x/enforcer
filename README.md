@@ -14,9 +14,9 @@ not finished yet
 
 <!-- * Check the project in `examples/enforcer_lib` for an example of a common Clojure application using `enforcer` as a library. You can run the application by executing `lein run`.
 
-* The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
  -->
 
+The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
 
 
 ## Installation
@@ -125,13 +125,15 @@ With all set up, whenever you want to apply the enforcement, you just call `enfo
 ```clojure
 (enforce #'my-fn [1 2])
 ```
-`enforce` will return a map that consists of param:value pairs (in this case `{:p1 1 :p2 2}`).
+`enforce` will return a map that consists of param:value pairs (in this case `{:p1 1 :p2 2}`). The pairs are in the same order as the arguments, so you can execute `(vals (enforce #'my-fn my-args))` to retrieve a sequence that consists in the coerced/validated arguments.
 
+<!--
 TODO:
 * create an example using enforcer as a library (`enforcer_lib`)
 * will everything work correctly?
-* will I need to create a function to return the right value to the caller?
-ideally `enforce` should return a vector with the arguments in the same order so I can apply my-fn res
+* will I need to create a function to return the right value to the caller?<br/>
+ideally `enforce` should return a vector with the arguments in the same order so I can apply my-fn res<br/>
+ -->
 
 ### 4b. Using `enforcer` as a Ring middleware
 Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes` function when calling `wrap-enforcer`, i.e.
@@ -150,7 +152,21 @@ The return value is the `#'target-function` from which `enforcer` will query the
 
 In order to achieve this using a different routing library, you might need to add some kind of dispatching function to handle your requests. E.g. in compojure, this might mean something like
 ```clojure
-; TODO: compojure handler dispatcher
+; ATTN: this is just a mock example of how things could be - it does not work
+
+; your dispatch function should look like this
+(defn dispatch-req [fnvar args]
+  (let [res (enforce fnvar args)]
+    (if-let [errors (get-errors res)]
+      (do-something-with-errors errors)
+      (apply fnvar (vals res))
+  )))
+
+; your OLD compojure route definition
+(GET  "/something/somewhere" [p1 p2] (my-handler p1 p2))
+
+; your NEW compojure route definition
+(GET  "/something/somewhere" [p1 p2] (dispatch-req #'my-handler p1 p2))
 ```
 
 `wrap-enforcer`also takes an optional third argument that is an error handler for the middleware. The default error handler returns an http response with the 400 status code (bad request) and a JSON body with all the errors. To override this default behavior, implement a function that accepts a single argument that is a vector of errors. The structure of each error is however you defined your errors to be in your `enforcer` error handlers.

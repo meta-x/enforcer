@@ -137,6 +137,20 @@
     )
   ))
 
+(defn get-errors [result]
+  "From an `enforce` result, retrieve a sequence of errors or nil if there are
+  none. Use case is in (if-let [errors (get-errors (enforce fnvar args))] ...)"
+  (->>
+    (map
+      #(if-let [error (:error %2)]
+          error
+          nil)
+      (keys result)
+      (vals result)
+    )
+    (filter (comp not nil?))
+    (seq) ; nil or ({error obj})
+  ))
 
 
 (defn enforce [fnvar args]
