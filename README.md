@@ -120,7 +120,7 @@ The same is true in the case where there is a coercion function but not a valida
 
 [_optional_] In the case where you prefer to just do it all in a single function, you can use the `:enforce` metadata key. `:enforce` takes precedence over `:coerce` and `validate`.
 
-### 4a. Executing `enforcer` in my Clojure app
+### 4a. Executing `enforcer` in your Clojure app
 With all set up, whenever you want to apply the enforcement, you just call `enforce`, passing the var of the target function, e.g. `#'my-fn`, and the list of arguments.
 ```clojure
 (enforce #'my-fn [1 2])
@@ -128,7 +128,7 @@ With all set up, whenever you want to apply the enforcement, you just call `enfo
 `enforce` will return a map that consists of param:value pairs (in this case `{:p1 1 :p2 2}`).
 
 TODO:
-* create an example using enforcer as a library
+* create an example using enforcer as a library (`enforcer_lib`)
 * will everything work correctly?
 * will I need to create a function to return the right value to the caller?
 ideally `enforce` should return a vector with the arguments in the same order so I can apply my-fn res

@@ -1,9 +1,9 @@
 (ns mx.enforcer.core
   )
 
-; TODO: auto-infer the namespace by using the :ns meta
-
-
+; TODO:
+; auto-infer the namespace by using the :ns meta
+; enforce's return value (or another function) should not be a map, but a vector in the same order as the arguments?
 
 ;;; "COERCION"
 
@@ -133,7 +133,7 @@
               (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)
             )))
         params)
-      (zipmap params) ; {:a 1 :b 2 ... :key value}
+      (zipmap (map keyword params)) ; {:a 1 :b 2 ... :key value}
     )
   ))
 
