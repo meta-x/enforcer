@@ -10,27 +10,20 @@ Please give feedback/suggestions/etc through github issues.
 
 ## Examples
 
-not finished yet
-
-<!-- * Check the project in `examples/enforcer_lib` for an example of a common Clojure application using `enforcer` as a library. You can run the application by executing `lein run`.
-
- -->
-
 The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
+
 
 
 ## Installation
 
-not finished yet
-
-<!-- Add
+Add
 
 ```clojure
 [enforcer "0.1.0-beta1"]
 ```
 
 to your leiningen `:dependencies`.
- -->
+
 
 
 ## Usage
@@ -173,14 +166,10 @@ In order to achieve this using a different routing library, you might need to ad
 
 
 
-## How it Works
-
-TODO: sketch of how `enforcer` works
-
-
 ## Limitations
 
 Due to the way Clojure's metadata works (metadata in parameters is not evaluated), all the functions you set in the target function must belong to the same namespace. If you have ideas on how to improve this (ideally that don't involve stating the namespace for each function), do share.
+
 
 
 ## TODO / You can help by
