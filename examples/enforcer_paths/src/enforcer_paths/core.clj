@@ -1,5 +1,5 @@
 (ns enforcer-paths.core
-  (:require [mx.paths.core :refer [create-routes-tree bind-query-routes router-with-tree]]
+  (:require [mx.paths.core :refer [create-routes-tree bind-query-routes-tree router-with-tree]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [mx.enforcer.middleware :refer [wrap-enforcer]]
@@ -19,7 +19,7 @@
 (def app
   (->
     (router-with-tree routes-tree)
-    (wrap-enforcer (bind-query-routes routes-tree))
+    (wrap-enforcer (bind-query-routes-tree routes-tree))
     (wrap-keyword-params)
     (wrap-params)
   ))
