@@ -18,9 +18,7 @@ The folder `examples/enforcer_paths` has an example of `enforcer` as a middlewar
 
 Add
 
-```clojure
-[enforcer "0.1.0-beta1"]
-```
+[![Current Version](https://clojars.org/enforcer/latest-version.svg)](https://clojars.org/enforcer)
 
 to your leiningen `:dependencies`.
 

@@ -1,9 +1,12 @@
-(ns mx.enforcer.core
-  )
+(ns mx.enforcer.core)
 
 ; TODO:
-; auto-infer the namespace by using the :ns meta
-; enforce's return value (or another function) should not be a map, but a vector in the same order as the arguments?
+; - auto-infer the namespace by using the :ns meta
+; - enforce's return value (or another function) should not be a map, but a vector in the same order as the arguments?
+; - fail-fast / fail-slow
+; - error function instead of :error - returns a type not map
+
+; this process is applied on a single value at a time
 
 ;;; "COERCION"
 
@@ -13,32 +16,32 @@
 ; what we're trying to achieve, to have the library automatically convert the
 ; value between types, even though it is done in an user-defined function
 
-; this process is applied on a single value at a time
-
-(defn- coerce [coerce-fn param arg on-coerce-fail]
+(defn- coerce
   "Applies the `coerce-fn` with the `arg` as argument. If `coerce-fn` throws
   an exception, `on-coerce-fail` will be called and supplied with the available
   information at the time."
+  [coerce-fn param arg on-coerce-fail]
   (try
     (coerce-fn arg)
     (catch Exception e
       (on-coerce-fail e param arg))))
 
-
-
 ;;; VALIDATION
 
-(defn- validate [validate-fn param arg on-validate-fail]
+(defn- validate
+  "Applies the `validate-fn` with the `arg` as argument. If `validate-fn` throws
+  an exception, `on-validate-fail` will be called and supplied with the available
+  information at the time."
+  [validate-fn param arg on-validate-fail]
   (try
     (validate-fn arg)
     (catch Exception e
       (on-validate-fail e param arg))))
 
-
-
 ;;; ENFORCER
 
-(defn- default-on-coerce-fail [exception param arg]
+(defn- default-on-coerce-fail
+  [exception param arg]
   {
     :error
     {
@@ -48,7 +51,8 @@
       :exception exception
     }
   })
-(defn- default-on-validate-fail [exception param arg]
+(defn- default-on-validate-fail
+  [exception param arg]
   {
     :error
     {
@@ -58,22 +62,23 @@
       :exception exception
     }
   })
-
-(defn- default-enforcer [arg _] ; default validate/coerce function (identity)
+(defn- default-enforcer
+  [arg _] ; default validate/coerce function (identity)
   arg)
 
-(defn- get-param-meta [param-meta ns key default]
+(defn- get-param-meta
   "Helper that extracts the metadata from function parameters."
+  [param-meta ns key default]
   (or
     (some->>
       (get param-meta key)
       (ns-resolve ns))
-    default
-    ))
+    default))
 
-(defn- coerce-validate [coerce-fn validate-fn param arg on-coerce-fail on-validate-fail]
+(defn- coerce-validate
   "Helper that applies coercion and validation or error handlers in case any of
   the functions fails."
+  [coerce-fn validate-fn param arg on-coerce-fail on-validate-fail]
   (try
     (let [coerced-val (coerce-fn param arg)]
       (try
@@ -83,17 +88,17 @@
     (catch Exception e
       (on-coerce-fail e param arg))))
 
-(defn run [fnvar args]
+(defn run
+  [fnvar args]
   ; obtain the general metadata from the function
-  ; `on-validate-fail`: general validation error handling function
-  ; `on-coerce-fail`: general coercion error handling function
   (let [metadata (meta fnvar)
         params (first (:arglists metadata))
-        fn-validate-fail (get metadata :validate-fail default-on-validate-fail)
-        fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail)
+        fn-validate-fail (get metadata :validate-fail default-on-validate-fail) ; `on-validate-fail`: general validation error handling function
+        fn-coerce-fail (get metadata :coerce-fail default-on-coerce-fail) ; `on-coerce-fail`: general coercion error handling function
         ns (:enforcer-ns metadata)]
     ; apply enforcer rules: TODO: is this "functional"? doesn't feel like it :\
     (->>
+      params
       (map
         (fn [param]
           ; argument-specific functions (attached to fnvar's arglists)
@@ -131,32 +136,24 @@
             (if (not (nil? enforce-fn))
               (enforce-fn param arg)
               (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)
-            )))
-        params)
-      (zipmap (map keyword params)) ; {:a 1 :b 2 ... :key value}
-    )
-  ))
+            ))))
+      (zipmap (map keyword params))))) ; {:a 1 :b 2 ... :key value}
 
-(defn get-errors [result]
+(defn get-errors
+  [result]
   "From an `enforce` result, retrieve a sequence of errors or nil if there are
   none. Use case is in (if-let [errors (get-errors (enforce fnvar args))] ...)"
   (->>
-    (map
-      #(if-let [error (:error %2)]
-          error
-          nil)
-      (keys result)
-      (vals result)
-    )
+    (map #(if-let [error (:error %2)] error nil) (keys result) (vals result))
     (filter (comp not nil?))
-    (seq) ; nil or ({error obj})
-  ))
+    (seq))) ; nil or ({error obj})
 
-
-(defn enforce [fnvar args]
-  ; coerce and validate the arguments against the function's definition
+(defn enforce
+  "Coerce and validate the arguments against the function's definition"
+  [fnvar args]
   (run fnvar args))
 
-(defn enforce-all [fnvars largs]
-  ; coerce and validate the list of arguments against the list of function definitions
+(defn enforce-all
+  "Coerce and validate the list of arguments against the list of function definitions"
+  [fnvars largs]
   (map enforce fnvars largs))

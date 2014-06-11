@@ -1,18 +1,17 @@
 (ns mx.enforcer.middleware
   (:require [mx.enforcer.core :refer [enforce get-errors]]
-            [cheshire.core :refer [generate-string]])
-  )
+            [cheshire.core :refer [generate-string]]))
 
-(defn- default-error-handler [errors]
-  {
-    :status 400
-    :body (generate-string errors) ; return a json string in the form [error-obj]
-  })
+(defn- default-error-handler
+  [errors]
+  {:status 400 :body (generate-string errors)}) ; return a json string in the form [error-obj]
 
-(defn- new-request [request old-params new-params]
+(defn- new-request
   "Updates the request object with the enforced parameter values."
+  [request old-params new-params]
   (->>
-    (merge old-params new-params)
+    new-params
+    (merge old-params)
     (assoc request :params)))
 
 (defn wrap-enforcer
@@ -31,5 +30,4 @@
         ; otherwise continue ring middleware processing
         (if-let [errors (get-errors new-params)]
           (error-handler errors)
-          (handler (new-request request old-params new-params)))
-  ))))
+          (handler (new-request request old-params new-params)))))))
