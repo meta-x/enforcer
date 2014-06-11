@@ -18,8 +18,8 @@
 
 (def app
   (->
-    (router-with-tree routes-tree)
+    routes-tree
+    (router-with-tree)
     (wrap-enforcer (bind-query-routes-tree routes-tree))
     (wrap-keyword-params)
-    (wrap-params)
-  ))
+    (wrap-params)))

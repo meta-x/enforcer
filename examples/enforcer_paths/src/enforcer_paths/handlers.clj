@@ -24,12 +24,12 @@
   (println p3 (type p3))
   (response (str p1 "\n" p2 "\n" p3)))
 
-(defn handler-with-no-args []
+(defn handler-with-no-args
+  []
   (println "--- handler-with-no-args")
   (response "no args"))
 
-(defn ^{:enforcer-ns 'enforcer-paths.enforcement} handler-wildcard [
-    ^{:enforce custom-enforcer-wildcards} wildcards
-  ]
+(defn ^{:enforcer-ns 'enforcer-paths.enforcement} handler-wildcard
+  [^{:enforce custom-enforcer-wildcards} wildcards]
   (println "--- handler-wildcard")
   (response wildcards))

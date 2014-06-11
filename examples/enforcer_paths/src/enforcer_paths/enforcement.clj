@@ -5,7 +5,8 @@
 
 ; general error handlers
 
-(defn custom-validate-fail [exception param arg]
+(defn custom-validate-fail
+  [exception param arg]
   (println "custom-validation-fail")
   {:error {
     :msg (str "1. " param " is not valid.")
@@ -14,7 +15,8 @@
     :exception (str exception)
   }})
 
-(defn custom-coerce-fail [exception param arg]
+(defn custom-coerce-fail
+  [exception param arg]
   (println "custom-coerce-fail")
   {:error {
     :msg (str "1. " param " could not be cast.")
@@ -25,7 +27,8 @@
 
 ; enforcer/coercer/validator
 
-(defn custom-enforcer [param arg]
+(defn custom-enforcer
+  [param arg]
   (println "custom-enforcer")
   (println param "\t" arg)
   (println arg)
@@ -38,7 +41,8 @@
     }}
     arg))
 
-(defn custom-enforcer-wildcards [param arg]
+(defn custom-enforcer-wildcards
+  [param arg]
   (println "custom-enforcer")
   (println param "\t" arg)
   (println arg)
@@ -51,12 +55,14 @@
     }}
     arg))
 
-(defn custom-coercer [param arg]
+(defn custom-coercer
+  [param arg]
   (println "custom-coercer")
   (println arg)
   (Integer/parseInt arg))
 
-(defn custom-validator [param arg]
+(defn custom-validator
+  [param arg]
   (println "custom-validator")
   (println arg)
   (if (> arg 5)
@@ -65,7 +71,8 @@
 
 ; argument error handlers
 
-(defn custom-coercion-error-handler [exception param arg]
+(defn custom-coercion-error-handler
+  [exception param arg]
   (println "custom-coercion-error-handler")
   {:error {
     :msg (str "2. " param " is not valid.")
@@ -74,7 +81,8 @@
     :exception (str exception)
   }})
 
-(defn custom-validation-error-handler [exception param arg]
+(defn custom-validation-error-handler
+  [exception param arg]
   (println "custom-validation-error-handler")
   {:error {
     :msg (str "2. " param " could not be cast.")
