@@ -132,9 +132,9 @@ ideally `enforce` should return a vector with the arguments in the same order so
  -->
 
 ### 4b. Using `enforcer` as a Ring middleware
-Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes` function when calling `wrap-enforcer`, i.e.
+Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes-tree` function when calling `wrap-enforcer`, i.e.
 ```clojure
-(wrap-enforcer (bind-query-routes routes-tree))
+(wrap-enforcer (bind-query-routes-tree routes-tree))
 ```
 
 If you are **not** using `paths`, then you must tell `enforcer` how to find the handler function for any given request. This means creating a function with the following signature and return value:
