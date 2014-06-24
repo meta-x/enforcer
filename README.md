@@ -50,6 +50,8 @@ If you're dealing with a Ring application, you only need to require the middlewa
 ```
 
 ### 2. Create your coercion/validation functions and error handlers
+
+#### 2.1a. Coerce/Validate
 The `coerce`/`validate` functions must take two parameters:
 * `param`: the name of the argument that is being evaluated
 * `arg`: the value of the argument that is being evaluated
@@ -65,12 +67,15 @@ The `coerce`/`validate` functions must take two parameters:
 In case of success these functions must return a single value - the `coerce` functions should return a coerced value; the `validate` functions will return the (same) input value `arg`.
 In case of error, the functions must throw an `exception`.
 
+#### 2.1b. Enforce
 In alternative, you can have a do-it-all `enforce` function. The `enforce` function is for the cases where you'd rather have a single function where you deal with everything. The `enforce` function must have the same signature and return value as the `coerce`/`validate` functions.
 ```clojure
 (defn custom-enforcer [param arg]
   ...)
 ```
 In case of error, a map with a single key named `:error` must be returned. The value of the map does not have to follow any rule.
+
+#### 2.2b Error Handling
 
 You _should_ also define your own error handlers (`:coerce-fail`/`:validate-fail`). There are two different "levels" of error handlers:
 * parameter error handlers are set up at the parameter level and will handle errors when evaluating that specific parameter

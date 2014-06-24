@@ -5,6 +5,7 @@
 ; - enforce's return value (or another function) should not be a map, but a vector in the same order as the arguments?
 ; - fail-fast / fail-slow
 ; - error function instead of :error - returns a type not map
+; - :enforcer-ns in wrap-enforcer instead of applying to all functions
 
 ; this process is applied on a single value at a time
 
@@ -63,7 +64,7 @@
     }
   })
 (defn- default-enforcer
-  [arg _] ; default validate/coerce function (identity)
+  [_ arg] ; default validate/coerce function (identity)
   arg)
 
 (defn- get-param-meta
