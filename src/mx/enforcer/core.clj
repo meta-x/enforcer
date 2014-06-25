@@ -49,7 +49,7 @@
       :msg (str "Failed to cast " param " with value " arg ". Exception: " exception)
       :param param
       :arg arg
-      :exception exception
+      :exception (str exception)
     }
   })
 (defn- default-on-validate-fail
@@ -60,7 +60,7 @@
       :msg (str "Failed to validate " param " with value " arg ". Exception: " exception)
       :param param
       :arg arg
-      :exception exception
+      :exception (str exception)
     }
   })
 (defn- default-enforcer
@@ -134,7 +134,7 @@
             ; - the enforced/coerced+validated value
             ; - error maps from the error-handlers
             ; mixed together
-            (if (not (nil? enforce-fn))
+            (if-not (nil? enforce-fn)
               (enforce-fn param arg)
               (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)
             ))))

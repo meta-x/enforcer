@@ -165,7 +165,7 @@ In order to achieve this using a different routing library, you might need to ad
 (GET  "/something/somewhere" [p1 p2] (dispatch-req #'my-handler p1 p2))
 ```
 
-`wrap-enforcer`also takes an optional third argument that is an error handler for the middleware. The default error handler returns an http response with the 400 status code (bad request) and a JSON body with all the errors. To override this default behavior, implement a function that accepts a single argument that is a vector of errors. The structure of each error is however you defined your errors to be in your `enforcer` error handlers.
+`wrap-enforcer` also takes an optional third argument that is an error handler for the middleware. The default error handler returns an http response with the 400 status code (bad request) and a JSON body with all the errors. To override this default behavior, implement a function that accepts a single argument that is a vector of errors. The structure of each error is however you defined your errors to be in your `enforcer` error handlers.
 
 
 
