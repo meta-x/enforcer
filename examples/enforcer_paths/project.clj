@@ -1,4 +1,4 @@
-(defproject enforcer_paths "0.1"
+(defproject enforcer_paths "0.2"
   :description "An example of enforcer with paths."
   :license {
     :name "The MIT License"
@@ -6,10 +6,10 @@
   }
   :dependencies [
     [org.clojure/clojure "1.6.0"]
-    [enforcer "0.1.0-beta1"]
-    [paths "0.1.0-beta3"]
-    [ring/ring-core "1.3.0-RC1"]
-    [ring/ring-jetty-adapter "1.3.0-RC1"]
+    [paths "0.1.0"]
+    [enforcer "0.1.0"]
+    [ring/ring-core "1.3.0"]
+    [ring/ring-jetty-adapter "1.3.0"]
     [cheshire "5.3.1"]
   ]
   :profiles {

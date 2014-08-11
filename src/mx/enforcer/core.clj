@@ -1,68 +1,9 @@
-(ns mx.enforcer.core)
-
-; TODO:
-; - auto-infer the namespace by using the :ns meta
-; - enforce's return value (or another function) should not be a map, but a vector in the same order as the arguments?
-; - fail-fast / fail-slow
-; - error function instead of :error - returns a type not map
-; - :enforcer-ns in wrap-enforcer instead of applying to all functions
-
-; this process is applied on a single value at a time
-
-;;; "COERCION"
-
-; NB: coercion in computer science means the implicit process of converting a
-; value of one type to another type
-; the term is not totally wrong for how it is used in this library, since that's
-; what we're trying to achieve, to have the library automatically convert the
-; value between types, even though it is done in an user-defined function
-
-(defn- coerce
-  "Applies the `coerce-fn` with the `arg` as argument. If `coerce-fn` throws
-  an exception, `on-coerce-fail` will be called and supplied with the available
-  information at the time."
-  [coerce-fn param arg on-coerce-fail]
-  (try
-    (coerce-fn arg)
-    (catch Exception e
-      (on-coerce-fail e param arg))))
-
-;;; VALIDATION
-
-(defn- validate
-  "Applies the `validate-fn` with the `arg` as argument. If `validate-fn` throws
-  an exception, `on-validate-fail` will be called and supplied with the available
-  information at the time."
-  [validate-fn param arg on-validate-fail]
-  (try
-    (validate-fn arg)
-    (catch Exception e
-      (on-validate-fail e param arg))))
+(ns mx.enforcer.core
+  (:require [mx.enforcer.coercion :refer [coerce default-on-coerce-fail]]
+            [mx.enforcer.validation :refer [validate default-on-validate-fail]]))
 
 ;;; ENFORCER
 
-(defn- default-on-coerce-fail
-  [exception param arg]
-  {
-    :error
-    {
-      :msg (str "Failed to cast " param " with value " arg ". Exception: " exception)
-      :param param
-      :arg arg
-      :exception (str exception)
-    }
-  })
-(defn- default-on-validate-fail
-  [exception param arg]
-  {
-    :error
-    {
-      :msg (str "Failed to validate " param " with value " arg ". Exception: " exception)
-      :param param
-      :arg arg
-      :exception (str exception)
-    }
-  })
 (defn- default-enforcer
   [_ arg] ; default validate/coerce function (identity)
   arg)

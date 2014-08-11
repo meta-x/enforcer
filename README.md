@@ -1,16 +1,8 @@
 # enforcer
 
-A library for coercion (or more correctly, type-casting) and validation of functions and their arguments. Designed use case is for Ring apps with the [`paths`](https://github.com/meta-x/paths) routing library.
-
-ATTN: under development!
+A library for coercion and validation of functions and their arguments. Designed use case is for Ring apps with the [`paths`](https://github.com/meta-x/paths) routing library.
 
 Please give feedback/suggestions/etc through github issues.
-
-
-
-## Examples
-
-The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
 
 
 
@@ -21,6 +13,12 @@ Add
 [![Current Version](https://clojars.org/enforcer/latest-version.svg)](https://clojars.org/enforcer)
 
 to your leiningen `:dependencies`.
+
+
+
+## Examples
+
+The folder `examples/enforcer_paths` has an example of `enforcer` as a middleware. Running `lein ring server` will launch a web server and open your browser at [http://localhost:3000](http://localhost:3000), showing you a series of links that should be self-explanatory.
 
 
 

@@ -1,5 +1,5 @@
-(defproject enforcer "0.1.0-beta3"
-  :description "A library for coercion (or more correctly, type-casting) and validation of functions and their arguments."
+(defproject enforcer "0.1.0"
+  :description "A library for coercion and validation of functions and their arguments."
   :url "https://github.com/meta-x/enforcer"
   :license {
     :name "The MIT License"
