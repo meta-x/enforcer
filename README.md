@@ -24,10 +24,10 @@ The folder `examples/enforcer_paths` has an example of `enforcer` as a middlewar
 
 ## Usage
 
-`enforcer` can be used as a common library in your Clojure apps or, more specifically, as a Ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
+`enforcer` can be used as a common library in your Clojure apps or, as a Ring middleware with [`paths`](https://github.com/meta-x/paths) or any compatible routing library.
 
 The key concepts are:
-* The target function and its arguments: the function that will "evaluated" and the arguments that you want to coerce and/or validate
+* The target function and its arguments: the function that will be "evaluated" and the arguments that you want to coerce and/or validate
 * The coercion/validation functions and error handlers: the functions that take care of executing the coercion and/or validation and that deal with wrong input
 
 This semi-legible image tries to explain how things are tied together
@@ -38,7 +38,7 @@ Follow the :rabbit2: to learn more about how to use `enforcer`.
 ### 1. Require the library
 Require what you wish to use. If you're only planning to use `enforcer` as a library in a common Clojure application, you need only to require the `enforce` function or `enforce-all` for the rare situations where you might want to apply enforcement on multiple target functions.
 
-If you're dealing with a Ring application, you only need to require the middleware.
+If you're dealing with a Ring application, you **only** need to require the middleware.
 
 ```clojure
 (ns ...
@@ -130,9 +130,9 @@ ideally `enforce` should return a vector with the arguments in the same order so
  -->
 
 ### 4b. Using `enforcer` as a Ring middleware
-Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `bind-query-routes-tree` function when calling `wrap-enforcer`, i.e.
+Using `enforcer` as a middleware to your Ring app might require some additional setup, depending on your routing library. If you are using `paths`, you must have manually created a `routes-tree` and use `paths`' `query` function when calling `wrap-enforcer`, i.e.
 ```clojure
-(wrap-enforcer (bind-query-routes-tree routes-tree))
+(wrap-enforcer (query routes-tree))
 ```
 
 If you are **not** using `paths`, then you must tell `enforcer` how to find the handler function for any given request. This means creating a function with the following signature and return value:
