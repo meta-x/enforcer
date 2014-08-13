@@ -1,6 +1,6 @@
-(ns mx.enforcer.coerce-utils)
+(ns mx.enforcer.coercers)
 
-; coercing helpers (i.e. common coercing functions)
+; common coercing functions
 
 (defn to-str
   [v]
@@ -30,7 +30,7 @@
 
 (defn to-datetime
   [v]
-  ; TODO: use jodatime or https://github.com/mbossenbroek/simple-time
+  ; TODO: use clj-time or https://github.com/mbossenbroek/simple-time
   )
 
 ; TODO: streams?

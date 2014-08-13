@@ -22,10 +22,10 @@
   ([handler query-routes error-handler]
     (fn [request]
       ; unwrap the objects and apply the enforcing
-      (let [[fn-var route-params] (query-routes request)
+      (let [[route-handler route-params] (query-routes request)
             request-params (:params request)
             old-params (merge request-params route-params)
-            new-params (enforce fn-var old-params)]
+            new-params (enforce route-handler old-params)]
         ; if there was any error during enforcing, execute error handler
         ; otherwise continue ring middleware processing
         (if-let [errors (get-errors new-params)]
