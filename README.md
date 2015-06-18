@@ -66,7 +66,7 @@ In case of success these functions must return a single value - the `coerce` fun
 In case of error, the functions must throw an `exception`.
 
 #### 2.1b. Enforce
-In alternative, you can have a do-it-all `enforce` function. The `enforce` function is for the cases where you'd rather have a single function where you deal with everything. The `enforce` function must have the same signature and return value as the `coerce`/`validate` functions.
+Instead, you can have a do-it-all `enforce` function. The `enforce` function is for the cases where you'd rather have a single function where you deal with everything. The `enforce` function must have the same signature and return value as the `coerce`/`validate` functions.
 ```clojure
 (defn custom-enforcer [param arg]
   ...)
@@ -116,8 +116,12 @@ The same is true in the case where there is a coercion function but not a valida
 
 ### 4a. Executing `enforcer` in your Clojure app
 With all set up, whenever you want to apply the enforcement, you just call `enforce`, passing the var of the target function, e.g. `#'my-fn`, and the list of arguments.
+<!--
+TODO: this is wrong!  enforce doesn't take a vector, it takes a map...
+either change enforcer to accept a vector or add another function that takes a vector...
+-->
 ```clojure
-(enforce #'my-fn [1 2])
+(enforce #'my-fn {:p1 1 :p2 2})
 ```
 `enforce` will return a map that consists of param:value pairs (in this case `{:p1 1 :p2 2}`). The pairs are in the same order as the arguments, so you can execute `(vals (enforce #'my-fn my-args))` to retrieve a sequence that consists in the coerced/validated arguments.
 
@@ -178,9 +182,18 @@ Due to the way Clojure's metadata works (metadata in parameters is not evaluated
 - writing real tests
 
 - improve doc
+<!--
+TODO:
+add an example (results) of the integrated execution!
+i.e. result of what happens when an error is thrown, etc - it's not clear
+-->
 
 - ask questions, make suggestions, etc
 
+- use slingshot for exceptions
+
+- one option to avoid having to declare the enforce-ns all the time
+is to pass it as a global arg to the enforce function in a optional config argument
 
 
 ## License
