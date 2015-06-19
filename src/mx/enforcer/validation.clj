@@ -1,4 +1,5 @@
-(ns mx.enforcer.validation)
+(ns mx.enforcer.validation
+  (:require [slingshot.slingshot :refer [try+]]))
 
 ;;; VALIDATION
 
@@ -7,9 +8,9 @@
   an exception, `on-validate-fail` will be called and supplied with the available
   information at the time."
   [validate-fn param arg on-validate-fail]
-  (try
+  (try+
     (validate-fn arg)
-    (catch Exception e
+    (catch Object e
       (on-validate-fail e param arg))))
 
 (defn default-on-validate-fail

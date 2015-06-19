@@ -1,5 +1,5 @@
 (ns mx.enforcer.middleware
-  (:require [mx.enforcer.core :refer [enforce get-errors]]
+  (:require [mx.enforcer.core :refer [enforce-map get-errors]]
             [cheshire.core :refer [generate-string]]))
 
 (defn- default-error-handler
@@ -25,7 +25,7 @@
       (let [[route-handler route-params] (query-routes request)
             request-params (:params request)
             old-params (merge request-params route-params)
-            new-params (enforce route-handler old-params)]
+            new-params (enforce-map route-handler old-params)]
         ; if there was any error during enforcing, execute error handler
         ; otherwise continue ring middleware processing
         (if-let [errors (get-errors new-params)]

@@ -1,4 +1,5 @@
-(ns mx.enforcer.coercion)
+(ns mx.enforcer.coercion
+  (:require [slingshot.slingshot :refer [try+]]))
 
 ;;; "COERCION"
 
@@ -7,9 +8,9 @@
   an exception, `on-coerce-fail` will be called and supplied with the available
   information at the time."
   [coerce-fn param arg on-coerce-fail]
-  (try
+  (try+
     (coerce-fn arg)
-    (catch Exception e
+    (catch Object e
       (on-coerce-fail e param arg))))
 
 (defn default-on-coerce-fail
