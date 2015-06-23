@@ -1,7 +1,7 @@
 (ns mx.enforcer.core
   (:require [slingshot.slingshot :refer [try+ throw+]]
-            [mx.enforcer.coercion :refer [coerce default-on-coerce-fail]]
-            [mx.enforcer.validation :refer [validate default-on-validate-fail]]))
+            [mx.enforcer.coercion :refer [try-coerce]]
+            [mx.enforcer.validation :refer [try-validate]]))
 
 ;;; ENFORCER
 
@@ -10,8 +10,8 @@
   [_ arg]
   arg)
 
-(defn- get-enf-fn
-  "Helper that returns the enforcing function (coercion, validation or enforcment)
+(defn- get-enforcing-fn
+  "Helper that returns the enforcing function (coercion, validation or enforcement)
   for the given parameter or, if not found, the default."
   [param-meta fn-ns k default]
   (or
@@ -25,16 +25,10 @@
 
 (defn- coerce-validate
   "Helper that applies coercion and validation or error handlers in case any of
-  the functions fails."
+  the functions fails (or allows the exception to trickle up)."
   [coerce-fn validate-fn param arg on-coerce-fail on-validate-fail]
-  (try+
-    (let [coerced-val (coerce-fn param arg)]
-      (try+
-        (validate-fn param coerced-val)
-        (catch Object e
-          (on-validate-fail e param arg))))
-    (catch Object e
-      (on-coerce-fail e param arg))))
+  (let [coerced-val (try-coerce coerce-fn param arg on-coerce-fail)]
+    (try-validate validate-fn param coerced-val on-validate-fail)))
 
 
 (defn- enforce-cv
@@ -42,19 +36,19 @@
   and executes them. Uses defaults when not found. This only runs if no general param `enforcer`
   was defined."
   [fn-ns fn-meta param-meta param arg]
-  (let [fn-validate-fail (get fn-meta :validate-fail default-on-validate-fail) ; general validation error handling function
-        fn-coerce-fail (get fn-meta :coerce-fail default-on-coerce-fail) ; general coercion error handling function
-        coerce-fn (get-enf-fn param-meta fn-ns :coerce default-enforcer) ; coercion function
-        coerce-fail (get-enf-fn param-meta fn-ns :coerce-fail fn-coerce-fail) ; coercion error handling function
-        validate-fn (get-enf-fn param-meta fn-ns :validate default-enforcer) ; validation function
-        validate-fail (get-enf-fn param-meta fn-ns :validate-fail fn-validate-fail)] ; validation error handling function
+  (let [fn-validate-fail (get fn-meta :validate-fail) ; general validation error handling function (default is nil)
+        fn-coerce-fail (get fn-meta :coerce-fail) ; general coercion error handling function (default is nil)
+        coerce-fn (get-enforcing-fn param-meta fn-ns :coerce default-enforcer) ; coercion function
+        coerce-fail (get-enforcing-fn param-meta fn-ns :coerce-fail fn-coerce-fail) ; coercion error handling function (returns the param's error handler of uses the general one)
+        validate-fn (get-enforcing-fn param-meta fn-ns :validate default-enforcer) ; validation function
+        validate-fail (get-enforcing-fn param-meta fn-ns :validate-fail fn-validate-fail)] ; validation error handling function (returns the param's error handler of uses the general one)
     (coerce-validate coerce-fn validate-fn param arg coerce-fail validate-fail)))
 
 (defn- enforce-param
   "Helper function that does the whole enforcement process on a parameter."
   [fn-ns fn-meta param arg]
   (let [param-meta (meta param)]
-    (if-let [enforce-fn (get-enf-fn param-meta fn-ns :enforce nil)]
+    (if-let [enforce-fn (get-enforcing-fn param-meta fn-ns :enforce nil)]
       ; use enforce (coercion+validation) function if found
       (enforce-fn param arg)
        ; otherwise default to coerce and/or validate
@@ -124,15 +118,14 @@
   "As the name suggests, this function takes a fnvar and a list of arguments,
   does the enforcement on the arguments and, if successful, executes fnvar.
   Throws an exception if otherwise."
-  [fnvar largs]
+  [fnvar & largs] ; ATTN: making largs optional is done for convenience, when calling enforce-and-exec
   (let [fn-meta (meta fnvar)
         params (first (:arglists fn-meta))
         kparams (map keyword params)
         parargs (zipmap kparams largs)
         enforced-args (run-aux fn-meta params parargs)]
     (if-let [errors (get-errors enforced-args)]
-      ; uh oh, errors, throw exception
-      ; TODO: clean this up - this should throw back the first error or return the errors...
+      ; uh oh, errors, throw enforce-error exception with all the errors
       (throw+ {:type :enforce-error :message "problems in enforce" :errors errors})
       ; it's all good, call the function (but first "unzipmap" on the new args)
       (apply fnvar (map #(% enforced-args) kparams)))))
