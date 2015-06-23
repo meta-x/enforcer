@@ -1,4 +1,4 @@
-(defproject enforcer "0.1.1-SNAPSHOT"
+(defproject enforcer "0.1.2-SNAPSHOT"
   :description "A library for coercion and validation of functions and their arguments."
   :url "https://github.com/meta-x/enforcer"
   :license {
